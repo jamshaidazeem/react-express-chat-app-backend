@@ -1,9 +1,16 @@
 const mongoose = require("mongoose");
 const userSchema = require("../models/User");
 
-const createUser = (req, res) => {
-  console.log("🚀 ~ file: userController.js:5 ~ createUser ~ req:", req.body);
-  res.json(req.body);
+const User = mongoose.model("User", userSchema);
+
+const createUser = async (req, res, next) => {
+  try {
+    const user = new User(req.body);
+    const savedUser = await user.save();
+    res.json(savedUser);
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = { createUser };
