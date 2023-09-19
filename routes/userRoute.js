@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const userSchema = require("../models/User");
 const bcrypt = require("bcryptjs");
 
+const jwt = require("jsonwebtoken");
+
 const User = mongoose.model("User", userSchema);
 
 const mailer = require("../mailer");
@@ -90,6 +92,47 @@ router.post("/verifyEmail", async (req, res, next) => {
       res.status(200).json({ message: "user verified successfully" });
     } else {
       throw helper.createErrorObj(`verification token is not valid!`, 400);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User.findOne({
+      email: email,
+    });
+    if (user) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw helper.createErrorObj(`password is not correct!`, 400);
+      }
+      if (!user.isVerified) {
+        throw helper.createErrorObj(
+          `you status is not verified!, please follow instructions in verify email sent to you!`,
+          400
+        );
+      }
+      // authentication logic
+      const tokenData = {
+        id: user._id,
+        email: user.email,
+        chatName: user.chatName,
+      };
+      const token = jwt.sign(tokenData, process.env.TOKEN_SECRET + "", {
+        expiresIn: "1d",
+      });
+      res.cookie("token", token, { httpOnly: true, path: "/" });
+      // send response
+      res
+        .status(200)
+        .json({ message: "user logged in successfully", data: user });
+    } else {
+      throw helper.createErrorObj(`email is not correct!`, 400);
     }
   } catch (error) {
     next(error);

@@ -30,7 +30,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 // middleware setup
-app.use(cors());
+app.use(cors({ origin: ["http://localhost:3000"], credentials: true })); // add list of origins, this setting is needed for cookies saving
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
