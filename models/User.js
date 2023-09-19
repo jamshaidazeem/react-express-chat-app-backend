@@ -41,6 +41,10 @@ const userSchema = new Schema({
     type: String,
     default: "",
   },
+  verificationTokenExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
 module.exports = userSchema;

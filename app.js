@@ -50,9 +50,9 @@ app.use(function (req, res, next) {
 
 // error handlers
 app.use(function (err, req, res, next) {
-  res
-    .status(err.statusCode || err.status || 500)
-    .json(err.message || "Unknown error");
+  const code = err.statusCode || err.status || 500;
+  const message = err.message || "Unknown error";
+  res.status(code).json({ message });
   // sending error response from this custom error handler because built-in error handler (next in line) is returning html page
 });
 
