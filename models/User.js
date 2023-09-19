@@ -6,7 +6,7 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
   },
   password: {
     type: String,
@@ -23,15 +23,23 @@ const userSchema = new Schema({
   chatName: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
   },
   age: {
     type: Number,
-    required: true,
+    default: 18,
   },
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    default: "",
   },
 });
 

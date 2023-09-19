@@ -48,7 +48,14 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// error handlers
+app.use(function (err, req, res, next) {
+  res
+    .status(err.statusCode || err.status || 500)
+    .json(err.message || "Unknown error");
+  // sending error response from this custom error handler because built-in error handler (next in line) is returning html page
+});
+
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
