@@ -56,7 +56,7 @@ router.post("/", async (req, res, next) => {
 
       if (updatedUser) {
         // send response
-        res.json({ message: "signup successful!" });
+        res.json({ email: savedUser.email });
       } else {
         throw helper.createErrorObj(
           `Something went wrong in user updation!`,
@@ -68,6 +68,28 @@ router.post("/", async (req, res, next) => {
         `Something went wrong in sending email!`,
         500
       );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/verifyEmail", async (req, res, next) => {
+  const token = req.body.token;
+  try {
+    // find user with token
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: Date.now() },
+    });
+    if (user) {
+      user.isVerified = true;
+      user.verificationToken = "";
+      user.verificationTokenExpiry = null;
+      await user.save();
+      res.status(200).json({ message: "user verified successfully" });
+    } else {
+      throw helper.createErrorObj(`verification token is not valid!`, 400);
     }
   } catch (error) {
     next(error);

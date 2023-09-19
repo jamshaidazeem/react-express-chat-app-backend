@@ -10,7 +10,7 @@ const transport = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = (email, token) => {
-  const emailVerificationLink = `${process.env.DOMAIN}/verifyEmail?token=${token}`;
+  const emailVerificationLink = `${process.env.DOMAIN}/verify-email?token=${token}`;
   const emailVerificationTag = `<a href="${emailVerificationLink}">Verify Email</a>`;
   const emailVerificationMessage = `You have signed up for our website!, in order to verify your email you have received this email, 
   please click on the link below:<br>${emailVerificationTag}`;
