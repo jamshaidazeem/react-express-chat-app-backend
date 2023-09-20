@@ -221,6 +221,38 @@ router.post("/newPassword", async (req, res, next) => {
 
 router.use(authenticationMiddleware);
 
+router.post("/resetPassword", async (req, res, next) => {
+  const currentPassword = req.body.currentPassword;
+  const newPassword = req.body.newPassword;
+
+  const tokenData = req.tokenData;
+
+  try {
+    // find user with email
+    const user = await User.findOne({ email: tokenData.email });
+    if (!user) {
+      throw helper.createErrorObj(`user not found!`, 400);
+    }
+    // check if current password is valid
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      throw helper.createErrorObj(`current password is not correct!`, 400);
+    }
+    // save updated password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({ message: "password updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/logout", async (req, res, next) => {
   try {
     res.clearCookie("token", { httpOnly: true, path: "/" });
