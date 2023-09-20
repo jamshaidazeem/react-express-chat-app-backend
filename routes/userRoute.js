@@ -139,4 +139,14 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+router.post("/logout", async (req, res, next) => {
+  try {
+    res.clearCookie("token", { httpOnly: true, path: "/" });
+    // send response
+    res.status(200).json({ message: "user logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
