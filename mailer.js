@@ -23,4 +23,17 @@ const sendVerificationEmail = (email, token) => {
   return transport.sendMail(options);
 };
 
-module.exports = { sendVerificationEmail };
+const sendForgotPasswordEmail = (email, token) => {
+  const forgotPasswordVerificationLink = `${process.env.DOMAIN}/new-password?token=${token}`;
+  const forgotPasswordVerificationTag = `<a href="${forgotPasswordVerificationLink}">Click to set new password</a>`;
+  const forgotPasswordVerificationMessage = `You have send a forgot password request using this email, please click on the link below:<br>${forgotPasswordVerificationTag}`;
+  const options = {
+    from: "jamshaid@idevnerds.com",
+    to: email,
+    subject: "Instructions for password reset",
+    html: forgotPasswordVerificationMessage,
+  };
+  return transport.sendMail(options);
+};
+
+module.exports = { sendVerificationEmail, sendForgotPasswordEmail };

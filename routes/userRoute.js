@@ -140,6 +140,54 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+router.post("/forgotPassword", async (req, res, next) => {
+  try {
+    // check if the user is already exists using given email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      throw helper.createErrorObj(
+        `User with email: ${req.body.email} not exists`,
+        400
+      );
+    }
+    // send forgot password email
+    const salt = await bcrypt.genSalt(10);
+    const verificationToken = await bcrypt.hash(user._id.toString(), salt);
+    try {
+      const info = await mailer.sendForgotPasswordEmail(
+        user.email,
+        verificationToken
+      );
+
+      // save verification token and verification token expiry in user
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id },
+        {
+          forgotPassToken: verificationToken,
+          forgotPassTokenExpiry: Date.now() + 36000000,
+        }
+      );
+
+      if (updatedUser) {
+        // send response
+        res.json({ email: updatedUser.email });
+      } else {
+        throw helper.createErrorObj(
+          `Something went wrong in user updation!`,
+          500
+        );
+      }
+    } catch (err) {
+      throw helper.createErrorObj(
+        `Something went wrong in sending email!`,
+        500
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.use(authenticationMiddleware);
 
 router.post("/logout", async (req, res, next) => {

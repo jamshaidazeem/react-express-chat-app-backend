@@ -45,6 +45,14 @@ const userSchema = new Schema({
     type: Date,
     default: null,
   },
+  forgotPassToken: {
+    type: String,
+    default: "",
+  },
+  forgotPassTokenExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
 module.exports = userSchema;
