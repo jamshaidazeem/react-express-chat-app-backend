@@ -13,7 +13,7 @@ const mailer = require("../mailer");
 const helper = require("../helper");
 const { authenticationMiddleware } = require("../middlewares/authenticator");
 
-router.post("/", async (req, res, next) => {
+router.post("/signup", async (req, res, next) => {
   try {
     // check if the user is already exists using given email OR chat name
     const userWithEmail = await User.findOne({ email: req.body.email });
@@ -128,10 +128,9 @@ router.post("/login", async (req, res, next) => {
         expiresIn: "1d",
       });
       res.cookie("token", token, { httpOnly: true, path: "/" });
+      res.cookie("tokenData", tokenData, { httpOnly: false, path: "/" });
       // send response
-      res
-        .status(200)
-        .json({ message: "user logged in successfully", data: user });
+      res.status(200).json({ message: "user logged in successfully" });
     } else {
       throw helper.createErrorObj(`email is not correct!`, 400);
     }
@@ -256,6 +255,7 @@ router.post("/resetPassword", async (req, res, next) => {
 router.post("/logout", async (req, res, next) => {
   try {
     res.clearCookie("token", { httpOnly: true, path: "/" });
+    res.clearCookie("tokenData", { httpOnly: false, path: "/" });
     // send response
     res.status(200).json({ message: "user logged out successfully" });
   } catch (error) {
