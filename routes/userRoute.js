@@ -11,6 +11,7 @@ const User = mongoose.model("User", userSchema);
 
 const mailer = require("../mailer");
 const helper = require("../helper");
+const { authenticationMiddleware } = require("../middlewares/authenticator");
 
 router.post("/", async (req, res, next) => {
   try {
@@ -138,6 +139,8 @@ router.post("/login", async (req, res, next) => {
     next(error);
   }
 });
+
+router.use(authenticationMiddleware);
 
 router.post("/logout", async (req, res, next) => {
   try {
