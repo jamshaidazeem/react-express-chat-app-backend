@@ -188,6 +188,37 @@ router.post("/forgotPassword", async (req, res, next) => {
   }
 });
 
+router.post("/newPassword", async (req, res, next) => {
+  const token = req.body.token;
+  const newPassword = req.body.newPassword;
+
+  try {
+    // find user with token
+    const user = await User.findOne({
+      forgotPassToken: token,
+      forgotPassTokenExpiry: { $gt: Date.now() },
+    });
+    if (user) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      console.log(
+        "🚀 ~ file: userRoute.js:204 ~ router.post ~ hashedPassword:",
+        hashedPassword
+      );
+
+      user.password = hashedPassword;
+      user.forgotPassToken = "";
+      user.forgotPassTokenExpiry = null;
+      await user.save();
+      res.status(200).json({ message: "password set successfully" });
+    } else {
+      throw helper.createErrorObj(`token is not valid!`, 400);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.use(authenticationMiddleware);
 
 router.post("/logout", async (req, res, next) => {
