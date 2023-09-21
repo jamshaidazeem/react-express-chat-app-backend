@@ -128,7 +128,10 @@ router.post("/login", async (req, res, next) => {
         expiresIn: "1d",
       });
       res.cookie("token", token, { httpOnly: true, path: "/" });
-      res.cookie("tokenData", tokenData, { httpOnly: false, path: "/" });
+      res.cookie("tokenData", JSON.stringify(tokenData), {
+        httpOnly: false,
+        path: "/",
+      });
       // send response
       res.status(200).json({ message: "user logged in successfully" });
     } else {
@@ -220,6 +223,35 @@ router.post("/newPassword", async (req, res, next) => {
 
 router.use(authenticationMiddleware);
 
+router.get("/detail/:id", async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    // find user with id
+    const user = await User.findOne(
+      { _id: userId },
+      {
+        _id: 1,
+        age: 1,
+        chatName: 1,
+        email: 1,
+        firstName: 1,
+        lastName: 1,
+        createdAt: 1,
+        isVerified: 1,
+      }
+    );
+    if (!user) {
+      throw helper.createErrorObj(`user not found!`, 400);
+    }
+    res
+      .status(200)
+      .json({ message: "user detail fetched successfully", data: user });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/resetPassword", async (req, res, next) => {
   const currentPassword = req.body.currentPassword;
   const newPassword = req.body.newPassword;
@@ -258,6 +290,33 @@ router.post("/logout", async (req, res, next) => {
     res.clearCookie("tokenData", { httpOnly: false, path: "/" });
     // send response
     res.status(200).json({ message: "user logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/update/:id", async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    // find user with id
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw helper.createErrorObj(`user not found!`, 400);
+    }
+    user.firstName = req.body.firstName;
+    user.lastName = req.body.lastName;
+    user.age = req.body.age;
+    await user.save();
+
+    const updatedUser = await User.findOne(
+      { _id: userId },
+      { _id: 1, email: 1, firstName: 1, lastName: 1, age: 1, chatName: 1 }
+    );
+
+    res
+      .status(200)
+      .json({ message: "user updated successfully", data: updatedUser });
   } catch (error) {
     next(error);
   }
