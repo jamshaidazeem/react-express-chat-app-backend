@@ -8,6 +8,7 @@ const cors = require("cors");
 // routing
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/userRoute");
+const messagesRouter = require("./routes/messageRoute");
 
 // database
 const mongoose = require("mongoose");
@@ -42,6 +43,7 @@ app.use("/", indexRouter);
 
 // register api routes
 app.use("/api/users", usersRouter);
+app.use("/api/messages", messagesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

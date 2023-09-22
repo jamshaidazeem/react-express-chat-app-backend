@@ -203,11 +203,6 @@ router.post("/newPassword", async (req, res, next) => {
     if (user) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
-      console.log(
-        "🚀 ~ file: userRoute.js:204 ~ router.post ~ hashedPassword:",
-        hashedPassword
-      );
-
       user.password = hashedPassword;
       user.forgotPassToken = "";
       user.forgotPassTokenExpiry = null;
@@ -317,6 +312,35 @@ router.put("/update/:id", async (req, res, next) => {
     res
       .status(200)
       .json({ message: "user updated successfully", data: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/chatUsers/:userId", async (req, res, next) => {
+  const userId = req.params.userId;
+
+  try {
+    // find all users except the user matching the userId
+    const users = await User.find(
+      { _id: { $ne: userId } },
+      {
+        _id: 1,
+        age: 1,
+        chatName: 1,
+        email: 1,
+        firstName: 1,
+        lastName: 1,
+        createdAt: 1,
+        isVerified: 1,
+      }
+    );
+    if (!users) {
+      throw helper.createErrorObj(`users not found!`, 400);
+    }
+    res
+      .status(200)
+      .json({ message: "users list fetched successfully", data: users });
   } catch (error) {
     next(error);
   }
